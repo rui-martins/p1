@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     }
 
     for (int j = 0; j <= turns; j++) {
-        if (j == turns) {
+        if ((j == turns) & (nhumans > 0)) {
             printf("\nYou win! Humans have survived!");
             break;
         }
