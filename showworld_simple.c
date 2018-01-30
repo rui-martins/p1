@@ -50,18 +50,18 @@ struct showworld {
     get_agent_info_at aginfo_func;
 };
 
-/** Variable for the canvas **/
+/* Variable for the canvas */
 ALLEGRO_DISPLAY *display = NULL;
-/** Variable for the font **/
+/* Variable for the font */
 ALLEGRO_FONT *font1 = NULL;
 
-/** Variables of the drawings of the agents on the canvas **/
+/* Variables of the drawings of the agents on the canvas */
 ALLEGRO_BITMAP *h_playable = NULL;
 ALLEGRO_BITMAP *h_ai = NULL;
 ALLEGRO_BITMAP *z_playable = NULL;
 ALLEGRO_BITMAP *z_ai = NULL;
 ALLEGRO_BITMAP *none = NULL;
-/** Variables for the width and height of the agents **/
+/* Variables for the width and height of the agents */
 int agent_width = 0, agent_height = 0;
 /* Create a new display/visualization object for the simulation world.
  *
@@ -72,7 +72,7 @@ SHOWWORLD *showworld_new(
     unsigned int ydim,
     get_agent_info_at aginfo_func) {
 
-    /** Initialize allegro's functions and addons **/
+    /* Initialize allegro's functions and addons */
     al_init();
     al_init_image_addon();
     al_init_font_addon();
@@ -84,50 +84,50 @@ SHOWWORLD *showworld_new(
     sw->ydim = ydim;
     sw->aginfo_func = aginfo_func;
 
-    /** Define agent width and height with the proportions to fit on
-    a 600 by 600 display **/
+    /* Define agent width and height with the proportions to fit on
+    a 600 by 600 display */
     agent_width = 600/(sw->xdim);
     agent_height = 600/(sw->ydim);
 
-    /** Initialize the window display with a fixed size of 600 by 600 **/
+    /* Initialize the window display with a fixed size of 600 by 600 */
     if((sw->xdim) == (sw->ydim)) {
       display = al_create_display(600,600);
     }
-    /** Initialize the window display with a width of 600 and
-    a height that maintains the proportions of the objects that'll be drew **/
+    /* Initialize the window display with a width of 600 and
+    a height that maintains the proportions of the objects that'll be drew */
     if((sw->xdim) > (sw->ydim)) {
       display = al_create_display((sw->xdim)*agent_width,
                                   (sw->ydim)*agent_width);
     }
-    /** Initialize the window display with a height of 600 and
-    a width that maintains the proportions of the objects that'll be drew **/
+    /* Initialize the window display with a height of 600 and
+    a width that maintains the proportions of the objects that'll be drew */
     if((sw->xdim) < (sw->ydim)) {
       display = al_create_display((sw->xdim)*agent_height,
                                   (sw->ydim)*agent_height);
     }
 
-    /** We do this so that the display draws all of the agents as squares **/
+    /* We do this so that the display draws all of the agents as squares */
     if((sw->xdim) > (sw->ydim)) {
       agent_height = 600/(sw->xdim);
     } else {
       agent_width = 600/(sw->ydim);
     }
 
-    /** Load the respective images of each agent **/
+    /* Load the respective images of each agent */
     h_playable = al_load_bitmap("Human1.png");
     h_ai = al_load_bitmap("Human2.png");
     z_playable = al_load_bitmap("Zombie1.png");
     z_ai = al_load_bitmap("Zombie2.png");
     none = al_load_bitmap("Bg.png");
 
-    /** Load the fonts that are going to be used and their respective size **/
+    /* Load the fonts that are going to be used and their respective size */
     if((sw->xdim) >= (sw->ydim)) {
       font1 = al_load_font("uni0553.ttf",600/((sw->xdim)*3),0);
     } else {
       font1 = al_load_font("uni0553.ttf",600/((sw->ydim)*3),0);
     }
 
-    /** Clear the background's color (just a precaution) **/
+    /* Clear the background's color (just a precaution) */
     al_clear_to_color(al_map_rgb(0,0,0));
 
     return sw;
@@ -140,7 +140,7 @@ SHOWWORLD *showworld_new(
  * `showworld.h`. */
 void showworld_destroy(SHOWWORLD *sw) {
 
-    /** Clear the memory **/
+    /* Clear the memory */
     al_destroy_bitmap(h_playable);
     al_destroy_bitmap(h_ai);
     al_destroy_bitmap(z_playable);
@@ -172,56 +172,56 @@ void showworld_update(SHOWWORLD *sw, void *w) {
             /** Extract the agent ID (16 bits). **/
             unsigned short ag_id = (item >> 3) & 0xFFFF;
 
-            /** Determine the agent type. **/
+            /* Determine the agent type. */
             switch (ag_type) {
 
-                /** If no agent is present at (x,y), draw Bg. **/
+                /* If no agent is present at (x,y), draw Bg. */
                 case None:
                     al_draw_scaled_bitmap(none, 0, 0, 32, 32,
                                           x*agent_width, y*agent_height,
                                           agent_width, agent_height, 0);
                     break;
 
-                /** If human agent present at (x,y) draw Human1 or Human2. **/
+                /* If human agent present at (x,y) draw Human1 or Human2. */
                 case Human:
                     if (playable) {
-                        /** Human1 for player-controlled human agent. **/
+                        /* Human1 for player-controlled human agent. */
                         al_draw_scaled_bitmap(h_playable, 0, 0, 32, 32,
                                               x*agent_width, y*agent_height,
                                               agent_width, agent_height, 0);
                     } else {
-                        /** Human2 for AI-controlled human agent. **/
+                        /* Human2 for AI-controlled human agent. */
                         al_draw_scaled_bitmap(h_ai,  0, 0, 32, 32,
                                               x*agent_width, y*agent_height,
                                               agent_width, agent_height, 0);
                     }
-                    /** Print the agent ID in front of it's image. **/
+                    /* Print the agent ID in front of it's image. */
                     al_draw_textf(font1, al_map_rgb(255,255,255),
                                   x*agent_width, y*agent_height,
                                   0, "%i", ag_id);
                     break;
 
-                /** If zombie agent present at (x,y) draw Zombie1 or Zombie2. **/
+                /* If zombie agent present at (x,y) draw Zombie1 or Zombie2. */
                 case Zombie:
                     if (playable) {
-                        /** Zombie1 for player-controlled zombie agent. **/
+                        /* Zombie1 for player-controlled zombie agent. */
                         al_draw_scaled_bitmap(z_playable, 0, 0, 32, 32,
                                               x*agent_width, y*agent_height,
                                               agent_width, agent_height, 0);
                     } else {
-                        /** Zombie2 for AI-controlled zombie agent. **/
+                        /* Zombie2 for AI-controlled zombie agent. */
                         al_draw_scaled_bitmap(z_ai, 0, 0, 32, 32,
                                               x*agent_width, y*agent_height,
                                               agent_width, agent_height, 0);
                     }
-                    /** Print the agent ID in front of the image. **/
+                    /* Print the agent ID in front of the image. */
                     al_draw_textf(font1, al_map_rgb(200,0,0),
                                   x*agent_width, y*agent_height,
                                   0, "%i", ag_id);
                     break;
 
-                /** Print '?' if unknown type detected. This should *never*
-                   happen. **/
+                /* Print '?' if unknown type detected. This should *never*
+                   happen. */
                 default:
                     al_draw_text(font1, al_map_rgb(255,255,255),
                                  x*agent_width, y*agent_height,
@@ -230,7 +230,7 @@ void showworld_update(SHOWWORLD *sw, void *w) {
             }
         }
     }
-    /** We call this function so that the objects can be seen on the
-    display, without it the display would be black**/
+    /* We call this function so that the objects can be seen on the
+    display, without it the display would be black*/
     al_flip_display();
 }

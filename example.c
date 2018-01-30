@@ -18,9 +18,12 @@
  #include <stdlib.h>
  #include <time.h>
 
+/* Main can receive parameters from the console line*/
 int main(int argc, char *argv[]) {
 
+    /* Create a CONFIG object that holds all the info from config.ini */
     CONFIG cfg = read_config(argc, argv);
+    /* Put all the values from config.ini in the respective vars */
     int WORLD_X = cfg.xdim;
     int WORLD_Y = cfg.ydim;
     int turns = cfg.turns;
@@ -28,18 +31,20 @@ int main(int argc, char *argv[]) {
     int nhumans = cfg.nhumans;
     int nzplayers = cfg.nzplayers;
     int nhplayers = cfg.nhplayers;
+    /* We use the FLAG to  break out of cycles when its value changes to 1 */
     int FLAG = 0;
 
+    /* Error message if number of agents exceed number of grid slots. */
     if ((nzombies+nhumans) > (WORLD_X*WORLD_Y)) {
         fprintf(stderr, "Number of agents can't exceed number of grid slots.");
         exit (1);
     }
-
+    /* Error message if of playable zombies exceed total zombies. */
     if (nzplayers > nzombies) {
         fprintf(stderr, "Number of playable zombies can't exceed initial zombies.");
         exit (1);
     }
-
+    /* Error message if of playable humans exceed total humans. */
     if (nhplayers > nhumans) {
         fprintf(stderr, "Number of playable humans can't exceed initial humans.");
         exit (1);
@@ -77,6 +82,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    /* Call function to populate grid */
     put_agent_on_grid(WORLD_X, WORLD_Y, agent_grid, cfg, &nagents);
 
     /* ******************************* */
@@ -96,46 +102,68 @@ int main(int argc, char *argv[]) {
     /* be used in the first part of the project.                             */
     /* ********************************************************************* */
 
+    /* Update the world */
     showworld_update(sw, &my_world);
 
-    /*            S    H     U     F     F    L     E          */
+    /* Counter to put agents into new array of pointers to AGENT */
     int counter = 0;
+    /* Array of pointers to AGENT of size nagents (total agents) */
     AGENT *agents_array[nagents];
+    /* ******************************************************************** */
+    /* Cycle through all cells in grid and check if agent types are != None */
+    /* ******************************************************************** */
     for (int i = 0; i < WORLD_X; ++i) {
         for (int j = 0; j < WORLD_Y; ++j) {
             if (agent_grid[i][j].type != None) {
+                /* If agent type is Zombie or Human then put it into new array */
                 agents_array[counter] = agent_new(agent_grid[i][j].type,
                                                   agent_grid[i][j].playable,
                                                   agent_grid[i][j].id,
                                                   agent_grid[i][j].x,
                                                   agent_grid[i][j].y);
-                  counter++;
+                /* Increment counter for next agent to put into the array */
+                counter++;
             }
         }
     }
-
+    /* Cycle through all the turns */
     for (int j = 0; j <= turns; j++) {
+        /* If j reaches max turns and number of humans is still > 0 you win! */
         if ((j == turns) & (nhumans > 0)) {
+            /* Print message of winning */
             printf("\nYou win! Humans have survived!");
             break;
         }
+        /* If FLAG is 1 then break cycle */
         if (FLAG == 1) break;
+        /* Call shuffle function to shuffle agents as new turn just started */
         shuffle(agents_array, nagents);
+        /* Cycle through the shuffled array for play order */
         for (unsigned int i = 0; i < nagents; i++) {
             if (FLAG == 1) break;
+            /* If agent at current position is playable... */
             if (agents_array[i]->playable == 1) {
+                /* Print current turn */
                 printf("You are currently on turn: %d\n", j+1);
+                /* Call manual play function */
                 manual_play(
                 WORLD_X, WORLD_Y, agent_grid, agents_array, i, nagents, &nhumans);
             }
+            /* If actual agent isn't playable... */
             else {
+                /* Print current turn */
                 printf("You are currently on turn: %d\n", j+1);
+                /* Call function to look for nearest agent (Moore Neighbourhood) */
                 nearest_agent_at(
                 WORLD_X, WORLD_Y, agent_grid, agents_array, i, nagents, &nhumans);
+                /* User has to press key to continue */
                 getchar();
             }
+            /* Update world grid */
             showworld_update(sw, &my_world);
+            /* If number of humans have reached 0 then it is game over */
             if (nhumans == 0) {
+                /*Print game over message on screen */
                 printf("\nGame Over. Humans have been wiped out.");
                 FLAG = 1;
                 break;
@@ -147,6 +175,7 @@ int main(int argc, char *argv[]) {
     printf("\nPress ENTER to continue...");
     getchar();
 
+    /* Destroy all the agents created */
     for (unsigned int i = 0; i < nagents; i++) {
         agent_destroy(agents_array[i]);
     }

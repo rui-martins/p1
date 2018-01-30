@@ -3,7 +3,12 @@
 
 #include "example.h"
 
-/* Function to shuffle agents before each turn */
+/**
+ * Shuffle Function.
+ * @param agents_array Array that holds pointers to `AGENT` objects of type
+ Human and Zombie.
+ * @param nagents Number of total agents.
+ * */
 void shuffle(AGENT **agents_to_shuffle, unsigned int nagents);
 
 #endif
